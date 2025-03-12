@@ -58,6 +58,7 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
     private MGConfig config = null;
     private FolderPermissionManager folderPermissionManager;
     private Boolean State = true;
+    private String CurrentText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -101,6 +102,27 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
         checkPermissionSilently();
     }
 
+    protected void onDestory() {
+        if (!CurrentText.isEmpty()) {
+            try {
+                int number = Integer.parseInt(CurrentText);
+                if (number < -1 || number == 0) {
+                    binding.inputMaxGlslCacheSize.setError("Error: number cannot be 0 or less than -1.");
+					Toast.makeToast(this,"保存GLSL缓存大小失败",1).show();
+                }
+                config.setMaxGlslCacheSize(number);
+                Toast.makeToast(this,"成功保存GLSL缓存大小",1).show();
+            } catch (NumberFormatException e) {
+                binding.inputMaxGlslCacheSize.setError("Error: invalid number.");
+				Toast.makeToast(this,"保存GLSL缓存大小失败",1).show();
+            } catch (IOException e) {
+                binding.inputMaxGlslCacheSize.setError("Error: unexpected error.");
+				Toast.makeToast(this,"保存GLSL缓存大小失败",1).show();
+                throw new RuntimeException(e);
+            }
+	    }
+		super.onDestory();
+    }
     private void showOptions() {
         try {
             config = MGConfig.loadConfig(this);
@@ -129,21 +151,7 @@ public class MainActivity extends ComponentActivity implements AdapterView.OnIte
             binding.inputMaxGlslCacheSize.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void afterTextChanged(Editable s) {
-                    String text = s.toString();
-                    if (!text.isEmpty()) {
-                        try {
-                            int number = Integer.parseInt(text);
-                            if (number < -1 || number == 0) {
-                                binding.inputMaxGlslCacheSize.setError("Error: number cannot be 0 or less than -1.");
-                            }
-                            config.setMaxGlslCacheSize(number);
-                        } catch (NumberFormatException e) {
-                            binding.inputMaxGlslCacheSize.setError("Error: invalid number.");
-                        } catch (IOException e) {
-                            binding.inputMaxGlslCacheSize.setError("Error: unexpected error.");
-                            throw new RuntimeException(e);
-                        }
-                    }
+                    CurrentText = s.toString();
                 }
 
                 @Override
